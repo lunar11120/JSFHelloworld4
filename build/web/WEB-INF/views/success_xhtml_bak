@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<h:head>
+    <title>OAuth2 Login Success</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            color: #28a745;
+            border-bottom: 3px solid #28a745;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .user-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .session-info {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .user-avatar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .user-avatar img {
+            border-radius: 50%;
+            border: 3px solid #007bff;
+            width: 100px;
+            height: 100px;
+        }
+        .info-row {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+            display: inline-block;
+            min-width: 120px;
+        }
+        .info-value {
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .status-verified {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-not-verified {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .nav-button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            margin: 10px 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+        .logout-button {
+            background-color: #dc3545;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+        .debug-section {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 30px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</h:head>
+<h:body>
+    <div class="container">
+        <h1 class="header">🎉 OAuth2 Login Successful!</h1>
+        
+        <!-- Login Status -->
+        <div class="status-success">
+            <strong>Login Status:</strong> <h:outputText value="#{googleCallbackManageBean.loginStatus}"/>
+        </div>
+        
+        <!-- Session User Information -->
+        <h:panelGroup rendered="#{googleCallbackManageBean.userLoggedIn}">
+            <div class="session-info">
+                <h3 style="color: #0056b3; margin-top: 0;">📋 Session User Information</h3>
+                
+                <div class="info-row">
+                    <span class="info-label">Session User ID:</span>
+                    <span class="info-value"><h:outputText value="#{googleCallbackManageBean.sessionUser.id}"/></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Session User Email:</span>
+                    <span class="info-value"><h:outputText value="#{googleCallbackManageBean.sessionUser.email}"/></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Session User Name:</span>
+                    <span class="info-value"><h:outputText value="#{googleCallbackManageBean.sessionUser.name}"/></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Email Verified:</span>
+                    <span class="info-value">
+                        <h:outputText value="✅ Verified" 
+                                      styleClass="status-verified"
+                                      rendered="#{googleCallbackManageBean.sessionUser.verifiedEmail}" />
+                        <h:outputText value="❌ Not Verified" 
+                                      styleClass="status-not-verified"
+                                      rendered="#{not googleCallbackManageBean.sessionUser.verifiedEmail}" />
+                    </span>
+                </div>
+                
+                <h:panelGroup rendered="#{googleCallbackManageBean.loginTime != null}">
+                    <div class="info-row">
+                        <span class="info-label">Login Time:</span>
+                        <span class="info-value">
+                            <h:outputText value="#{googleCallbackManageBean.loginTime}">
+                                <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
+                            </h:outputText>
+                        </span>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </h:panelGroup>
+        
+        <!-- Google User Information -->
+        <h:panelGroup rendered="#{googleCallbackManageBean.isAuthen}">
+            <div class="user-info">
+                <h3 style="color: #495057; margin-top: 0;">👤 Google User Profile</h3>
+                
+                <!-- User Avatar -->
+                <div class="user-avatar">
+                    <h:graphicImage value="#{googleCallbackManageBean.userPicture}" 
+                                    alt="User Profile Picture"
+                                    rendered="#{not empty googleCallbackManageBean.userPicture}" />
+                    <h:outputText value="📷 No profile picture available" 
+                                  rendered="#{empty googleCallbackManageBean.userPicture}"
+                                  style="color: #6c757d;" />
+                </div>
+                
+                <!-- User Details -->
+                <div class="info-row">
+                    <span class="info-label">Google User ID:</span>
+                    <span class="info-value"><h:outputText value="#{googleCallbackManageBean.userId}"/></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Full Name:</span>
+                    <span class="info-value"><h:outputText value="#{googleCallbackManageBean.userName}"/></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Email Address:</span>
+                    <span class="info-value"><h:outputText value="#{googleCallbackManageBean.userEmail}"/></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Email Verified:</span>
+                    <span class="info-value">
+                        <h:outputText value="✅ Verified" 
+                                      styleClass="status-verified"
+                                      rendered="#{googleCallbackManageBean.emailVerified}" />
+                        <h:outputText value="❌ Not Verified" 
+                                      styleClass="status-not-verified"
+                                      rendered="#{not googleCallbackManageBean.emailVerified}" />
+                    </span>
+                </div>
+                
+                <h:panelGroup rendered="#{googleCallbackManageBean.googleUser != null and not empty googleCallbackManageBean.googleUser.given_name}">
+                    <div class="info-row">
+                        <span class="info-label">Given Name:</span>
+                        <span class="info-value"><h:outputText value="#{googleCallbackManageBean.googleUser.given_name}"/></span>
+                    </div>
+                </h:panelGroup>
+                
+                <h:panelGroup rendered="#{googleCallbackManageBean.googleUser != null and not empty googleCallbackManageBean.googleUser.family_name}">
+                    <div class="info-row">
+                        <span class="info-label">Family Name:</span>
+                        <span class="info-value"><h:outputText value="#{googleCallbackManageBean.googleUser.family_name}"/></span>
+                    </div>
+                </h:panelGroup>
+                
+                <h:panelGroup rendered="#{googleCallbackManageBean.googleUser != null and not empty googleCallbackManageBean.googleUser.locale}">
+                    <div class="info-row">
+                        <span class="info-label">Locale:</span>
+                        <span class="info-value"><h:outputText value="#{googleCallbackManageBean.googleUser.locale}"/></span>
+                    </div>
+                </h:panelGroup>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div style="text-align: center; margin-top: 30px;">
+                <h:form>
+                    <h:commandButton value="🏠 Back to Home" 
+                                     action="index?faces-redirect=true"
+                                     styleClass="nav-button" />
+                    
+                    <h:commandButton value="🚪 Logout" 
+                                     action="#{googleCallbackManageBean.logout}"
+                                     styleClass="nav-button logout-button" />
+                </h:form>
+            </div>
+            
+            <!-- Debug Section -->
+            <div class="debug-section">
+                <strong>Debug Information:</strong><br/>
+                Session ID: #{facesContext.externalContext.session.id}<br/>
+                Bean Authentication Status: #{googleCallbackManageBean.isAuthen}<br/>
+                Session User Found: #{googleCallbackManageBean.sessionUser != null ? 'YES' : 'NO'}<br/>
+                Access Token: #{googleCallbackManageBean.accessToken != null ? 'Present' : 'Not Available'}<br/>
+                Bean User ID: <h:outputText value="#{googleCallbackManageBean.userId}"/><br/>
+                Bean User Email: <h:outputText value="#{googleCallbackManageBean.userEmail}"/><br/>
+                Bean User Name: <h:outputText value="#{googleCallbackManageBean.userName}"/><br/>
+                Session User ID: <h:outputText value="#{googleCallbackManageBean.sessionUser.id}"/><br/>
+                Session User Email: <h:outputText value="#{googleCallbackManageBean.sessionUser.email}"/>
+            </div>
+        </h:panelGroup>
+        
+        <!-- Error Message if not authenticated -->
+        <h:panelGroup rendered="#{not googleCallbackManageBean.isAuthen}">
+            <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; text-align: center;">
+                <h3>❌ Authentication Failed</h3>
+                <p>Current authentication status: <h:outputText value="#{googleCallbackManageBean.isAuthen}"/></p>
+                <p>Login Status: <h:outputText value="#{googleCallbackManageBean.loginStatus}"/></p>
+                <p>Session User: <h:outputText value="#{googleCallbackManageBean.sessionUser != null ? 'Found' : 'Not Found'}"/></p>
+                <h:form>
+                    <h:commandButton value="🔄 Try Again" 
+                                     action="index?faces-redirect=true"
+                                     styleClass="nav-button" />
+                </h:form>
+            </div>
+        </h:panelGroup>
+    </div>
+</h:body>
+</html>
